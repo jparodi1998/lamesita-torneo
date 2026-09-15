@@ -32,11 +32,14 @@ def admin():
 
 @app.route('/api/estado', methods=['GET'])
 def obtener_estado():
+    # Averiguamos la IP fresca en este preciso momento
+    ip_fresca = obtener_ip_local() 
+    
     return jsonify({
         "jugadores": jugadores,
         "rondas": rondas_generadas,
-        "ronda_activa": ronda_actual_idx, # Le avisamos a la pantalla qué ronda iluminar
-        "ip_admin": f"http://{IP_LOCAL}:5000/admin"
+        "ronda_activa": ronda_actual_idx, 
+        "ip_admin": f"http://{ip_fresca}:5000/admin" # Usamos la nueva variable
     })
 
 @app.route('/api/agregar', methods=['POST'])
