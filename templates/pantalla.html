@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Torneo - Pantalla</title>
+    <style>
+        /* PALETA DE COLORES LMI Y VARIABLES MODERNAS */
+        :root {
+            --azul-lmi: #276495;
+            --celeste-lmi: #A1E4ED;
+            --rojo-oscuro: #762A29;
+            --rojo-destello: #F92021;
+            --fondo-ultra-oscuro: #07090e; /* Azul casi negro */
+            --r: 5; 
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background-color: var(--fondo-ultra-oscuro);
+            color: white; 
+            margin: 0; 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* ==================================================
+           FONDOS ABSTRACTOS FLUIDOS (COMO EN LA IMAGEN)
+           ================================================== */
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            animation: flotar 15s infinite alternate ease-in-out;
+        }
+        .orb-1 {
+            top: -10vh; left: -10vw;
+            width: 50vw; height: 50vw;
+            background: rgba(39, 100, 149, 0.3); /* Azul ambiental */
+        }
+        .orb-2 {
+            bottom: -20vh; right: -10vw;
+            width: 60vw; height: 60vw;
+            background: rgba(118, 42, 41, 0.25); /* Bordó ambiental */
+            animation-delay: -5s;
+        }
+        .orb-3 {
+            top: 40vh; left: 30vw;
+            width: 40vw; height: 40vw;
+            background: rgba(161, 228, 237, 0.1); /* Celeste suave en el centro */
+            animation-delay: -10s;
+        }
+
+        @keyframes flotar {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5vw, 5vh) scale(1.1); }
+        }
+        
+        /* ==================================================
+           ENCABEZADO FLOTANTE EFECTO CRISTAL (GLASSMORPHISM)
+           ================================================== */
+        .header { 
+            /* En vez de un bloque sólido, es un cristal flotante */
+            background: rgba(39, 100, 149, 0.15); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(161, 228, 237, 0.2);
+            border-radius: 20px;
+            
+            display: flex; justify-content: space-between; align-items: center; 
+            flex-wrap: wrap; 
+            padding: 1vh 2vh; 
+            margin: 2vh 2vh 0 2vh;
+            height: 6vh; 
+            box-sizing: border-box;
+            flex-shrink: 0; gap: 1vh 2vh; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            z-index: 10;
+        }
+        
+        .logo-container { display: flex; align-items: center; gap: 1.5vh; min-width: 0; }
+        .logo-img { height: 4vh; border-radius: 8px; background: rgba(255,255,255,0.9); padding: 3px; flex-shrink: 0; box-shadow: 0 0 10px rgba(255,255,255,0.2);}
+        .header h1 { margin: 0; font-size: min(3vh, 5vw); font-weight: 800; white-space: nowrap; color: var(--celeste-lmi); letter-spacing: 2px;}
+        
+        /* Botón de la IP con estilo futurista */
+        .ip-info { 
+            font-size: min(1.5vh, 2.8vw); font-family: monospace; font-weight: bold; 
+            background: linear-gradient(90deg, rgba(249,32,33,0.2), rgba(118,42,41,0.2));
+            border: 1px solid var(--rojo-destello);
+            color: white; padding: 0.5vh 1.5vh; border-radius: 20px; white-space: nowrap; 
+            box-shadow: 0 0 15px rgba(249,32,33,0.3);
+        }
+        
+        /* CONTENEDOR PRINCIPAL */
+        #fixture-container { 
+            flex: 1; display: flex; flex-direction: column; 
+            gap: calc(3vh / var(--r)); padding: calc(3vh / var(--r)) 2vh; 
+            box-sizing: border-box; min-height: 0; z-index: 10;
+        }
+
+        /* ==================================================
+           SALA DE ESPERA (MEDALLAS GLOW)
+           ================================================== */
+        .espera-container { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100%; width: 100%; padding-top: 5vh; box-sizing: border-box; }
+        .espera-titulo { font-size: 5vh; color: white; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 1vh; text-shadow: 0 0 20px rgba(161, 228, 237, 0.5); }
+        .espera-contador { font-size: 2.5vh; color: var(--celeste-lmi); margin-bottom: 6vh; background: rgba(39,100,149,0.2); border: 1px solid rgba(161,228,237,0.3); padding: 1vh 3vh; border-radius: 30px; backdrop-filter: blur(10px);}
+        .jugadores-grid { display: flex; flex-wrap: wrap; gap: 3vh; justify-content: center; width: 90%; align-content: flex-start; }
+        
+        .jugador-badge {
+            background: linear-gradient(135deg, rgba(39, 100, 149, 0.6) 0%, rgba(118, 42, 41, 0.6) 100%);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 2vh 4vh; border-radius: 16px; font-size: 3.5vh; font-weight: bold; color: white;
+            text-transform: capitalize; 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+            animation: aparecer 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            backdrop-filter: blur(10px);
+        }
+        @keyframes aparecer { 0% { transform: scale(0.8) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+        
+        /* ==================================================
+           ESTILOS DEL TORNEO (EL EFECTO DE LA IMAGEN)
+           ================================================== */
+        .ronda-card { 
+            flex: 1; 
+            border-radius: 16px; 
+            display: flex; flex-direction: column; 
+            padding: calc(4vh / var(--r)); 
+            box-sizing: border-box; min-height: 0; 
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* RONDA INACTIVA: Cristal oscuro, bordes tenues */
+        .ronda-card.inactiva {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            opacity: 0.6;
+            transform: scale(0.98);
+        }
+
+        /* RONDA ACTIVA: El degradado futurista y brillante de la referencia */
+        .ronda-card.activa {
+            background: linear-gradient(135deg, rgba(39,100,149,0.5) 0%, rgba(118,42,41,0.5) 100%);
+            border: 1px solid rgba(161, 228, 237, 0.4);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(249, 32, 33, 0.2);
+            opacity: 1;
+            transform: scale(1.02);
+            z-index: 2;
+        }
+        
+        .ronda-title { 
+            color: white; font-size: calc(14vh / var(--r)); font-weight: 800; 
+            margin: 0 0 calc(2vh / var(--r)) 0; 
+            flex-shrink: 0; text-transform: uppercase; letter-spacing: 3px; 
+            transition: all 0.4s;
+        }
+        /* Solo le ponemos la línea inferior a la activa para que destaque más */
+        .activa .ronda-title { border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: calc(1vh / var(--r)); text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .inactiva .ronda-title { color: #888; }
+        
+        .mesas-wrapper { display: flex; flex: 1; gap: 1.5vh; min-height: 0; }
+        
+        /* MESAS: Sub-tarjetas de cristal oscuro adentro de la tarjeta principal */
+        .mesa-item { 
+            flex: 1; 
+            background: rgba(0, 0, 0, 0.4); 
+            border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            padding: calc(3vh / var(--r)); min-height: 0; min-width: 0; container-type: inline-size; 
+            transition: all 0.4s;
+        }
+        
+        .mesa-num { 
+            color: var(--celeste-lmi); font-size: min(5cqi, calc(9vh / var(--r))); margin-bottom: calc(1vh / var(--r)); 
+            font-weight: 700; flex-shrink: 0; text-transform: uppercase; letter-spacing: 3px;
+        }
+        .inactiva .mesa-num { color: #555; }
+        
+        .matchup { display: flex; flex-direction: row; align-items: center; justify-content: center; width: 100%; font-weight: 800; font-size: min(10.5cqi, calc(18vh / var(--r))); min-width: 0; }
+        .nombre-p1, .nombre-p2 { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: capitalize; min-width: 0; color: white; }
+        .nombre-p1 { text-align: right; }
+        .nombre-p2 { text-align: left; }
+        .inactiva .nombre-p1, .inactiva .nombre-p2 { color: #888; }
+        
+        /* BOTÓN VS FUTURISTA */
+        .vs { 
+            background: linear-gradient(135deg, var(--rojo-destello), var(--rojo-oscuro));
+            color: white; font-size: 0.35em; padding: 0.4em 1em;
+            border-radius: 30px; margin: 0 2.5cqi; flex-shrink: 0; transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 15px rgba(249, 32, 33, 0.4);
+        }
+        .inactiva .vs { background: #222; border-color: #333; color: #555; box-shadow: none; }
+        
+        .activa .vs { animation: pulsarNeom 2s infinite; }
+
+        @keyframes pulsarNeom {
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(249, 32, 33, 0.4); }
+            50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(249, 32, 33, 0.8), 0 0 10px white; }
+            100% { transform: scale(1); box-shadow: 0 0 15px rgba(249, 32, 33, 0.4); }
+        }
+        
+        .descanso-bar { 
+            margin-top: calc(3vh / var(--r)); 
+            background: rgba(0, 0, 0, 0.2); 
+            border-radius: 8px; text-align: center; 
+            padding: calc(2vh / var(--r));
+            font-size: calc(11vh / var(--r)); color: #aaa; flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .activa .descanso-bar { color: white; background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); }
+        
+        .msj-vacio { font-size: 4vh; color: #888; display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; z-index: 10; }
+    </style>
+</head>
+<body>
+    <!-- FONDOS ABSTRACTOS DE COLOR -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <div class="header">
+        <div class="logo-container">
+            <img src="/static/Logo-LMI.png" alt="Logo LMI" class="logo-img">
+            <h1>LA MESITA</h1>
+        </div>
+        <div class="ip-info">📲 <span id="ip-texto">Cargando...</span></div>
+    </div>
+
+    <div id="fixture-container">
+        <div class="msj-vacio">Esperando conexión...</div>
+    </div>
+
+    <script>
+        let hashAnterior = "";
+
+        async function actualizarPantalla() {
+            try {
+                const response = await fetch('/api/estado');
+                const data = await response.json();
+                
+                const ipLimpia = data.ip_admin.replace("http://", "");
+                document.getElementById('ip-texto').innerText = ipLimpia;
+                
+                const container = document.getElementById('fixture-container');
+                
+                if (!data.rondas || data.rondas.length === 0) {
+                    const hashJugadores = "JUGADORES:" + JSON.stringify(data.jugadores);
+                    if (hashAnterior === hashJugadores) return; 
+                    hashAnterior = hashJugadores;
+
+                    if (data.jugadores.length > 0) {
+                        let badges = data.jugadores.map(j => `<div class="jugador-badge">${j}</div>`).join('');
+                        container.innerHTML = `
+                            <div class="espera-container">
+                                <div class="espera-titulo">Jugadores Anotados</div>
+                                <div class="espera-contador">Total: <span style="color: white; font-weight: bold;">${data.jugadores.length}</span></div>
+                                <div class="jugadores-grid">${badges}</div>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = '<div class="msj-vacio">Esperando que se anoten los jugadores...</div>';
+                    }
+                    return;
+                }
+
+                const hashRondas = "RONDAS:" + JSON.stringify(data.rondas);
+
+                if (hashRondas === hashAnterior) {
+                    document.querySelectorAll('.ronda-card').forEach((card, index) => {
+                        if (index === data.ronda_activa) {
+                            card.classList.add('activa');
+                            card.classList.remove('inactiva');
+                        } else {
+                            card.classList.add('inactiva');
+                            card.classList.remove('activa');
+                        }
+                    });
+                    return; 
+                }
+                
+                hashAnterior = hashRondas;
+                
+                const divisorMatematico = Math.max(5, data.rondas.length);
+                document.documentElement.style.setProperty('--r', divisorMatematico);
+
+                let htmlContent = '';
+                data.rondas.forEach((ronda, index) => {
+                    let partidosHtml = '';
+                    ronda.partidos.forEach(p => {
+                        partidosHtml += `
+                            <div class="mesa-item">
+                                <div class="mesa-num">MESA ${p.mesa}</div>
+                                <div class="matchup">
+                                    <div class="nombre-p1">${p.jugador1}</div>
+                                    <div class="vs">VS</div>
+                                    <div class="nombre-p2">${p.jugador2}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    let descansanHtml = ronda.descansan.length > 0 
+                        ? `<span style="text-transform: capitalize; font-weight: bold; letter-spacing: 1px;">DESCANSAN: ${ronda.descansan.join(', ')}</span>` 
+                        : `<span style="font-weight: bold; letter-spacing: 1px;">DESCANSAN: NADIE</span>`;
+
+                    const estadoClase = index === data.ronda_activa ? 'activa' : 'inactiva';
+
+                    htmlContent += `
+                        <div class="ronda-card ${estadoClase}">
+                            <div class="ronda-title">RONDA ${ronda.numero}</div>
+                            <div class="mesas-wrapper">
+                                ${partidosHtml}
+                            </div>
+                            <div class="descanso-bar">${descansanHtml}</div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = htmlContent;
+            } catch (error) {
+                console.error("Error conectando:", error);
+            }
+        }
+
+        setInterval(actualizarPantalla, 2000);
+        actualizarPantalla();
+    </script>
+</body>
+</html>

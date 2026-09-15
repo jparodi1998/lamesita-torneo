@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - LMI</title>
+    <style>
+        :root {
+            --azul-lmi: #276495;
+            --celeste-lmi: #A1E4ED;
+            --rojo-oscuro: #762A29;
+            --rojo-destello: #F92021;
+            --fondo-ultra-oscuro: #07090e;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            padding: 20px; 
+            background-color: var(--fondo-ultra-oscuro); 
+            color: white; 
+            max-width: 500px; 
+            margin: auto; 
+            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Fondos abstractos fluidos adaptados a móvil */
+        .bg-orb { position: absolute; border-radius: 50%; filter: blur(70px); z-index: -1; animation: flotar 15s infinite alternate ease-in-out; }
+        .orb-1 { top: 0; left: -20%; width: 250px; height: 250px; background: rgba(39, 100, 149, 0.25); }
+        .orb-2 { bottom: 10%; right: -20%; width: 250px; height: 250px; background: rgba(118, 42, 41, 0.2); animation-delay: -5s; }
+        
+        @keyframes flotar { 0% { transform: translate(0, 0); } 100% { transform: translate(15px, 20px); } }
+
+        /* Encabezado Glassmorphism */
+        .header-admin {
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            background: rgba(39, 100, 149, 0.15);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            padding: 15px; border-radius: 16px; margin-bottom: 20px; 
+            color: var(--celeste-lmi); border: 1px solid rgba(161, 228, 237, 0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .header-admin img { height: 40px; border-radius: 8px; background: rgba(255,255,255,0.9); padding: 3px; }
+        .header-admin h2 { margin: 0; text-transform: uppercase; font-weight: 800; letter-spacing: 2px;}
+        
+        /* Inputs y Botones Modernos */
+        input { 
+            padding: 15px; margin: 8px 0; width: 100%; box-sizing: border-box; 
+            font-size: 18px; border-radius: 12px; 
+            background: rgba(255, 255, 255, 0.05); color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+        input:focus { outline: none; border-color: var(--celeste-lmi); box-shadow: 0 0 15px rgba(161,228,237,0.2); }
+        
+        button { padding: 15px; margin: 8px 0; width: 100%; box-sizing: border-box; font-size: 18px; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s; }
+        
+        button.btn-agregar { 
+            background: rgba(161, 228, 237, 0.1); color: var(--celeste-lmi); 
+            border: 1px solid rgba(161, 228, 237, 0.3); font-weight: bold; 
+        }
+        button.btn-agregar:active { background: rgba(161, 228, 237, 0.2); transform: scale(0.98); }
+
+        button.btn-generar { 
+            background: linear-gradient(135deg, var(--rojo-destello), var(--rojo-oscuro));
+            color: white; font-weight: 900; font-size: 20px; margin-top: 20px; 
+            box-shadow: 0 4px 15px rgba(249, 32, 33, 0.3); text-transform: uppercase; letter-spacing: 2px;
+        }
+        button.btn-generar:active { transform: scale(0.98); box-shadow: 0 2px 5px rgba(249, 32, 33, 0.4); }
+        
+        /* Lista de Jugadores */
+        .jugador-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(255,255,255,0.03); padding: 15px; margin-bottom: 10px; 
+            border-radius: 12px; font-size: 18px; font-weight: bold; 
+            border-left: 4px solid var(--azul-lmi); border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+        .btn-eliminar { background: rgba(249, 32, 33, 0.15); color: #ff6b6b; border: 1px solid rgba(249, 32, 33, 0.3); border-radius: 8px; padding: 10px 15px; width: auto; font-weight: bold; margin: 0; }
+        
+        /* Panel de Control de Rondas */
+        .panel-rondas { 
+            display: none; background: rgba(39, 100, 149, 0.1); padding: 20px; 
+            border-radius: 16px; margin-top: 20px; 
+            border: 1px solid rgba(161, 228, 237, 0.2); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .info-ronda { text-align: center; font-size: 1.3em; font-weight: 900; margin-bottom: 15px; color: white; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .controles-ronda { display: flex; gap: 10px; }
+        .btn-control { flex: 1; font-weight: bold; font-size: 16px; padding: 15px 5px; border-radius: 12px; margin: 0; text-transform: uppercase;}
+        .btn-ant { background: rgba(255,255,255,0.05); color: #aaa; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-sig { background: linear-gradient(135deg, var(--celeste-lmi), var(--azul-lmi)); color: var(--fondo-ultra-oscuro); font-weight: 900; border: none; box-shadow: 0 4px 15px rgba(161, 228, 237, 0.3);}
+        .btn-sig:active { transform: scale(0.96); }
+    </style>
+</head>
+<body>
+    <!-- Fondos fluidos -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <div class="header-admin">
+        <img src="/static/Logo-LMI.png" alt="Logo LMI">
+        <h2>Gestión LMI</h2>
+    </div>
+    
+    <input type="text" id="nombreInput" placeholder="Nombre del jugador..." onkeypress="manejarEnter(event)">
+    <button class="btn-agregar" onclick="agregar()">+ Añadir Jugador</button>
+    
+    <button class="btn-generar" onclick="generarFixture()">⚙️ Armar Fixture</button>
+    
+    <div id="panel-rondas" class="panel-rondas">
+        <div class="info-ronda" id="info-ronda">Jugando: Ronda 1</div>
+        <div class="controles-ronda">
+            <button class="btn-control btn-ant" onclick="cambiarRonda('ant')">⏪ Ant.</button>
+            <button class="btn-control btn-sig" onclick="cambiarRonda('sig')">Sig. ⏩</button>
+        </div>
+    </div>
+    
+    <h3 style="margin-top: 30px; letter-spacing: 1px; font-weight: 800;">ANOTADOS: <span id="contador" style="color: var(--celeste-lmi); text-shadow: 0 0 10px rgba(161,228,237,0.4);">0</span></h3>
+    <div id="lista-jugadores"></div>
+
+    <script>
+        async function cargarEstado() {
+            const response = await fetch('/api/estado');
+            const data = await response.json();
+            const lista = document.getElementById('lista-jugadores');
+            lista.innerHTML = '';
+            document.getElementById('contador').innerText = data.jugadores.length;
+
+            data.jugadores.forEach(j => {
+                lista.innerHTML += `
+                    <div class="jugador-item">
+                        <span style="text-transform: capitalize;">${j}</span>
+                        <button class="btn-eliminar" onclick="eliminar('${j}')">X</button>
+                    </div>
+                `;
+            });
+
+            const panel = document.getElementById('panel-rondas');
+            if (data.rondas && data.rondas.length > 0) {
+                panel.style.display = 'block';
+                document.getElementById('info-ronda').innerText = `Jugando: Ronda ${data.ronda_activa + 1} / ${data.rondas.length}`;
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        async function agregar() {
+            const input = document.getElementById('nombreInput');
+            const nombre = input.value.trim();
+            if(nombre) {
+                await fetch('/api/agregar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({nombre: nombre}) });
+                input.value = '';
+                input.focus();
+                cargarEstado();
+            }
+        }
+
+        function manejarEnter(event) { if (event.key === "Enter") agregar(); }
+
+        async function eliminar(nombre) {
+            await fetch('/api/eliminar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({nombre: nombre}) });
+            cargarEstado();
+        }
+
+        async function generarFixture() {
+            await fetch('/api/armar_partidos', { method: 'POST' });
+            cargarEstado();
+        }
+
+        async function cambiarRonda(dir) {
+            await fetch('/api/cambiar_ronda', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({dir: dir}) });
+            cargarEstado();
+        }
+
+        cargarEstado();
+    </script>
+</body>
+</html>
