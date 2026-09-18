@@ -3,178 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - LMI</title>
+    <title>LMI ADMIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --azul-lmi: #276495;
-            --celeste-lmi: #A1E4ED;
-            --rojo-oscuro: #762A29;
-            --rojo-destello: #F92021;
-            --fondo-ultra-oscuro: #07090e;
-        }
+        body { font-family: 'Inter', sans-serif; background: #111; color: #fff; padding: 20px; margin: 0; }
+        h1 { color: #00f0ff; text-align: center; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; }
+        .card { background: #222; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; }
+        input, select { width: 100%; padding: 12px; background: #000; color: #00f0ff; border: 1px solid #00f0ff; border-radius: 5px; box-sizing: border-box; font-family: inherit; font-size: 1rem; margin-bottom: 10px; }
+        button { width: 100%; padding: 15px; background: #00f0ff; color: #000; border: none; border-radius: 5px; font-weight: bold; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; }
+        button:active { opacity: 0.8; transform: scale(0.98); }
+        .btn-red { background: #ff0055; color: #fff; }
         
-        body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            padding: 20px; 
-            background-color: var(--fondo-ultra-oscuro); 
-            color: white; 
-            max-width: 500px; 
-            margin: auto; 
-            position: relative;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-        
-        /* Fondos abstractos fluidos adaptados a móvil */
-        .bg-orb { position: absolute; border-radius: 50%; filter: blur(70px); z-index: -1; animation: flotar 15s infinite alternate ease-in-out; }
-        .orb-1 { top: 0; left: -20%; width: 250px; height: 250px; background: rgba(39, 100, 149, 0.25); }
-        .orb-2 { bottom: 10%; right: -20%; width: 250px; height: 250px; background: rgba(118, 42, 41, 0.2); animation-delay: -5s; }
-        
-        @keyframes flotar { 0% { transform: translate(0, 0); } 100% { transform: translate(15px, 20px); } }
+        .lista-jugadores { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .jugador-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 5px; border-left: 3px solid #00f0ff; }
+        .btn-quitar { background: #ff0055; color: white; width: 35px; padding: 5px; margin: 0; border-radius: 5px; }
 
-        /* Encabezado Glassmorphism */
-        .header-admin {
-            display: flex; align-items: center; justify-content: center; gap: 15px;
-            background: rgba(39, 100, 149, 0.15);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            padding: 15px; border-radius: 16px; margin-bottom: 20px; 
-            color: var(--celeste-lmi); border: 1px solid rgba(161, 228, 237, 0.15);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .header-admin img { height: 40px; border-radius: 8px; background: rgba(255,255,255,0.9); padding: 3px; }
-        .header-admin h2 { margin: 0; text-transform: uppercase; font-weight: 800; letter-spacing: 2px;}
-        
-        /* Inputs y Botones Modernos */
-        input { 
-            padding: 15px; margin: 8px 0; width: 100%; box-sizing: border-box; 
-            font-size: 18px; border-radius: 12px; 
-            background: rgba(255, 255, 255, 0.05); color: white;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        }
-        input:focus { outline: none; border-color: var(--celeste-lmi); box-shadow: 0 0 15px rgba(161,228,237,0.2); }
-        
-        button { padding: 15px; margin: 8px 0; width: 100%; box-sizing: border-box; font-size: 18px; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s; }
-        
-        button.btn-agregar { 
-            background: rgba(161, 228, 237, 0.1); color: var(--celeste-lmi); 
-            border: 1px solid rgba(161, 228, 237, 0.3); font-weight: bold; 
-        }
-        button.btn-agregar:active { background: rgba(161, 228, 237, 0.2); transform: scale(0.98); }
-
-        button.btn-generar { 
-            background: linear-gradient(135deg, var(--rojo-destello), var(--rojo-oscuro));
-            color: white; font-weight: 900; font-size: 20px; margin-top: 20px; 
-            box-shadow: 0 4px 15px rgba(249, 32, 33, 0.3); text-transform: uppercase; letter-spacing: 2px;
-        }
-        button.btn-generar:active { transform: scale(0.98); box-shadow: 0 2px 5px rgba(249, 32, 33, 0.4); }
-        
-        /* Lista de Jugadores */
-        .jugador-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: rgba(255,255,255,0.03); padding: 15px; margin-bottom: 10px; 
-            border-radius: 12px; font-size: 18px; font-weight: bold; 
-            border-left: 4px solid var(--azul-lmi); border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        }
-        .btn-eliminar { background: rgba(249, 32, 33, 0.15); color: #ff6b6b; border: 1px solid rgba(249, 32, 33, 0.3); border-radius: 8px; padding: 10px 15px; width: auto; font-weight: bold; margin: 0; }
-        
-        /* Panel de Control de Rondas */
-        .panel-rondas { 
-            display: none; background: rgba(39, 100, 149, 0.1); padding: 20px; 
-            border-radius: 16px; margin-top: 20px; 
-            border: 1px solid rgba(161, 228, 237, 0.2); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .info-ronda { text-align: center; font-size: 1.3em; font-weight: 900; margin-bottom: 15px; color: white; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
-        .controles-ronda { display: flex; gap: 10px; }
-        .btn-control { flex: 1; font-weight: bold; font-size: 16px; padding: 15px 5px; border-radius: 12px; margin: 0; text-transform: uppercase;}
-        .btn-ant { background: rgba(255,255,255,0.05); color: #aaa; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-sig { background: linear-gradient(135deg, var(--celeste-lmi), var(--azul-lmi)); color: var(--fondo-ultra-oscuro); font-weight: 900; border: none; box-shadow: 0 4px 15px rgba(161, 228, 237, 0.3);}
-        .btn-sig:active { transform: scale(0.96); }
+        .partido { background: #000; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #00f0ff; }
+        .mesa-titulo { font-size: 0.9rem; color: #888; margin-bottom: 10px; }
+        .vs-fila { display: flex; justify-content: space-around; align-items: center; font-size: 1.5rem; font-weight: bold; margin: 15px 0; }
     </style>
 </head>
 <body>
-    <!-- Fondos fluidos -->
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
 
-    <div class="header-admin">
-        <img src="/static/Logo-LMI.png" alt="Logo LMI">
-        <h2>Gestión LMI</h2>
+    <h1>🎮 ADMIN LMI</h1>
+
+    <div id="seccion-setup" class="card">
+        <h3>1. Cargar Jugadores</h3>
+        
+        <select id="select-siempre">
+            <option value="">-- Elegir de los de siempre --</option>
+            <option value="JULIAN1">JULIAN1</option>
+            <option value="JULIAN2">JULIAN2</option>
+            <option value="ADRIAN">ADRIAN</option>
+            <option value="LEO">LEO</option>
+            <option value="RAFA">RAFA</option>
+            <option value="PABLO">PABLO</option>
+            <option value="EMI">EMI</option>
+            <option value="LUIGGI">LUIGGI</option>
+            <option value="GABI">GABI</option>
+            <option value="SANTI">SANTI</option>
+            <option value="MIGUEL">MIGUEL</option>
+            <option value="EDU">EDU</option>
+        </select>
+        <button onclick="agregarDropdown()" style="padding: 10px;">AGREGAR CONOCIDO</button>
+
+        <input type="text" id="input-nuevo" placeholder="O escribir nombre nuevo...">
+        <button onclick="agregarManual()" style="padding: 10px; background: #333; color:#fff;">AGREGAR NUEVO</button>
+
+        <h4 style="margin-top: 20px; border-bottom: 1px solid #333; padding-bottom: 5px;">ANOTADOS AHORA:</h4>
+        <div class="lista-jugadores" id="lista-setup"></div>
+
+        <button onclick="iniciarTorneo()" style="margin-top: 20px; padding: 20px; font-size: 1.3rem;">🔥 INICIAR JORNADA</button>
     </div>
-    
-    <input type="text" id="nombreInput" placeholder="Nombre del jugador..." onkeypress="manejarEnter(event)">
-    <button class="btn-agregar" onclick="agregar()">+ Añadir Jugador</button>
-    
-    <button class="btn-generar" onclick="generarFixture()">⚙️ Armar Fixture</button>
-    
-    <div id="panel-rondas" class="panel-rondas">
-        <div class="info-ronda" id="info-ronda">Jugando: Ronda 1</div>
-        <div class="controles-ronda">
-            <button class="btn-control btn-ant" onclick="cambiarRonda('ant')">⏪ Ant.</button>
-            <button class="btn-control btn-sig" onclick="cambiarRonda('sig')">Sig. ⏩</button>
+
+    <div id="seccion-juego" style="display: none;">
+        
+        <div class="card">
+            <h3>📡 Zócalo Deportivo</h3>
+            <input type="text" id="input-ticker" placeholder="Escribí una noticia...">
+            <button onclick="actualizarTicker()" style="padding: 10px; font-size: 0.9rem;">ENVIAR A PANTALLA</button>
+        </div>
+
+        <div class="card">
+            <h3 id="titulo-ronda-activa" style="color: #ff0055;">RONDA ACTIVA</h3>
+            <div id="contenedor-partidos"></div>
+        </div>
+
+        <button class="btn-red" onclick="avanzarRonda()" style="margin-top: 20px;">⏭️ AVANZAR RONDA MANUAL</button>
+
+        <div class="card" style="margin-top: 30px; border-color: #ff0055;">
+            <h3 style="color: #ff0055;">🚨 GESTIONAR BAJAS</h3>
+            <p style="font-size: 0.8rem; color: #888;">Si alguien se va temprano, eliminalo acá.</p>
+            <div class="lista-jugadores" id="lista-jugando"></div>
         </div>
     </div>
-    
-    <h3 style="margin-top: 30px; letter-spacing: 1px; font-weight: 800;">ANOTADOS: <span id="contador" style="color: var(--celeste-lmi); text-shadow: 0 0 10px rgba(161,228,237,0.4);">0</span></h3>
-    <div id="lista-jugadores"></div>
 
     <script>
-        async function cargarEstado() {
-            const response = await fetch('/api/estado');
-            const data = await response.json();
-            const lista = document.getElementById('lista-jugadores');
-            lista.innerHTML = '';
-            document.getElementById('contador').innerText = data.jugadores.length;
+        let estadoActual = null;
 
-            data.jugadores.forEach(j => {
-                lista.innerHTML += `
-                    <div class="jugador-item">
-                        <span style="text-transform: capitalize;">${j}</span>
-                        <button class="btn-eliminar" onclick="eliminar('${j}')">X</button>
-                    </div>
-                `;
-            });
-
-            const panel = document.getElementById('panel-rondas');
-            if (data.rondas && data.rondas.length > 0) {
-                panel.style.display = 'block';
-                document.getElementById('info-ronda').innerText = `Jugando: Ronda ${data.ronda_activa + 1} / ${data.rondas.length}`;
+        async function fetchEstado() {
+            let res = await fetch('/api/estado');
+            estadoActual = await res.json();
+            
+            if (estadoActual.estado === 'setup') {
+                document.getElementById('seccion-setup').style.display = 'block';
+                document.getElementById('seccion-juego').style.display = 'none';
+                renderListaJugadores('lista-setup');
             } else {
-                panel.style.display = 'none';
+                document.getElementById('seccion-setup').style.display = 'none';
+                document.getElementById('seccion-juego').style.display = 'block';
+                document.getElementById('titulo-ronda-activa').innerText = `RONDA ${estadoActual.numero_ronda}`;
+                document.getElementById('input-ticker').value = estadoActual.ticker_msg;
+                renderizarPartidosAdmin();
+                renderListaJugadores('lista-jugando');
             }
         }
 
-        async function agregar() {
-            const input = document.getElementById('nombreInput');
-            const nombre = input.value.trim();
-            if(nombre) {
-                await fetch('/api/agregar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({nombre: nombre}) });
-                input.value = '';
-                input.focus();
-                cargarEstado();
+        async function mandarAgregar(nombre) {
+            if (!nombre) return;
+            await fetch('/api/agregar_jugador', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({jugador: nombre})
+            });
+            fetchEstado();
+        }
+
+        function agregarDropdown() {
+            let select = document.getElementById('select-siempre');
+            mandarAgregar(select.value);
+            select.value = "";
+        }
+
+        function agregarManual() {
+            let input = document.getElementById('input-nuevo');
+            mandarAgregar(input.value.toUpperCase());
+            input.value = "";
+        }
+
+        async function quitarJugador(nombre) {
+            if(confirm(`¿Seguro que querés eliminar a ${nombre}?`)) {
+                await fetch('/api/quitar_jugador', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({jugador: nombre})
+                });
+                fetchEstado();
             }
         }
 
-        function manejarEnter(event) { if (event.key === "Enter") agregar(); }
-
-        async function eliminar(nombre) {
-            await fetch('/api/eliminar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({nombre: nombre}) });
-            cargarEstado();
+        function renderListaJugadores(contenedorId) {
+            let html = estadoActual.jugadores.map(j => `
+                <div class="jugador-item">
+                    <span>${j}</span>
+                    <button class="btn-quitar" onclick="quitarJugador('${j}')">X</button>
+                </div>
+            `).join('');
+            document.getElementById(contenedorId).innerHTML = html || "<span style='color:#555;'>Nadie anotado aún...</span>";
         }
 
-        async function generarFixture() {
-            await fetch('/api/armar_partidos', { method: 'POST' });
-            cargarEstado();
+        async function iniciarTorneo() {
+            let res = await fetch('/api/iniciar', { method: 'POST' });
+            if (res.status === 400) alert("Cargá mínimo 2 jugadores loco");
+            fetchEstado();
         }
 
-        async function cambiarRonda(dir) {
-            await fetch('/api/cambiar_ronda', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({dir: dir}) });
-            cargarEstado();
+        async function avanzarRonda() {
+            if(confirm("¿Forzar avance a la próxima ronda?")) {
+                await fetch('/api/avanzar', { method: 'POST' });
+                fetchEstado();
+            }
         }
 
-        cargarEstado();
+        async function actualizarTicker() {
+            let texto = document.getElementById('input-ticker').value;
+            await fetch('/api/ticker', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ticker: texto})
+            });
+        }
+
+        function renderizarPartidosAdmin() {
+            let html = "";
+            estadoActual.ronda_actual.partidos.forEach((p) => {
+                html += `
+                    <div class="partido">
+                        <div class="mesa-titulo">MESA ${p.mesa}</div>
+                        <div class="vs-fila">
+                            <span style="color: #00f0ff;">${p.jugador1}</span>
+                            <span style="color: #ff0055; font-size: 1rem;">VS</span>
+                            <span style="color: #00f0ff;">${p.jugador2}</span>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('contenedor-partidos').innerHTML = html;
+        }
+
+        fetchEstado();
+        setInterval(fetchEstado, 3000); 
     </script>
 </body>
 </html>

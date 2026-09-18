@@ -2,334 +2,310 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Torneo - Pantalla</title>
+    <title>LA MESITA - Arena Principal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
-        /* PALETA DE COLORES LMI Y VARIABLES MODERNAS */
-        :root {
-            --azul-lmi: #276495;
-            --celeste-lmi: #A1E4ED;
-            --rojo-oscuro: #762A29;
-            --rojo-destello: #F92021;
-            --fondo-ultra-oscuro: #07090e; /* Azul casi negro */
-            --r: 5; 
-        }
+        :root { --bg-arena: #03050a; --accent-cyan: #00f0ff; --accent-red: #ff0055; --accent-gold: #ffaa00; --text-main: #ffffff; }
+        body { margin: 0; padding: 30px 40px 0 40px; background-color: var(--bg-arena); color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        body::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 150px rgba(0,0,0,0.9); pointer-events: none; z-index: 9996; }
+        .bg-blobs { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -3; overflow: hidden; }
+        .blob-cyan { position: absolute; top: -10%; left: -5%; width: 40vw; height: 40vw; background: rgba(0, 240, 255, 0.15); filter: blur(80px); animation: float-blob 12s infinite alternate ease-in-out; }
+        .blob-red { position: absolute; bottom: -10%; right: -5%; width: 40vw; height: 40vw; background: rgba(255, 0, 85, 0.12); filter: blur(80px); animation: float-blob 15s infinite alternate-reverse ease-in-out; }
+        @keyframes float-blob { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10%, 15%) scale(1.1); } }
+        .bg-grid { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background-image: linear-gradient(rgba(0, 240, 255, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.15) 1px, transparent 1px); background-size: 40px 40px; transform: perspective(600px) rotateX(60deg) translateY(-100px) scale(2); animation: move-grid 15s linear infinite; }
+        @keyframes move-grid { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
+        .hud-corners { position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px; pointer-events: none; z-index: 9997; }
+        .hud-corners::before, .hud-corners::after, .hud-corners span::before, .hud-corners span::after { content: ''; position: absolute; width: 40px; height: 40px; border: 3px solid var(--accent-cyan); box-shadow: 0 0 10px rgba(0,240,255,0.5); animation: breathe 4s infinite alternate ease-in-out; }
+        .hud-corners::before { top: 0; left: 0; border-right: none; border-bottom: none; } .hud-corners::after { top: 0; right: 0; border-left: none; border-bottom: none; } .hud-corners span::before { bottom: 0; left: 0; border-right: none; border-top: none; } .hud-corners span::after { bottom: 0; right: 0; border-left: none; border-top: none; }
+        @keyframes breathe { 0% { opacity: 0.7; } 100% { opacity: 1; } }
 
-        body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background-color: var(--fondo-ultra-oscuro);
-            color: white; 
-            margin: 0; 
-            height: 100vh; 
-            overflow: hidden; 
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0, 240, 255, 0.2); padding-bottom: 15px; margin-bottom: 15px; z-index: 10; }
+        .logo-container { display: flex; align-items: center; gap: 20px; }
+        .club-logo { width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5)); }
+        .logo-placeholder { width: 60px; height: 60px; background: rgba(0, 240, 255, 0.2); border: 2px solid var(--accent-cyan); border-radius: 8px; display: flex; justify-content: center; align-items: center; font-family: 'Chakra Petch'; color: var(--accent-cyan); font-weight: bold; box-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+        h1 { font-family: 'Chakra Petch', sans-serif; font-size: 3rem; margin: 0; letter-spacing: 4px; text-transform: uppercase; background: linear-gradient(90deg, var(--accent-cyan), #ffffff); -webkit-background-clip: text; color: transparent; }
+        
+        #reloj-digital { font-family: 'Chakra Petch', sans-serif; font-size: 2.2rem; color: var(--accent-cyan); letter-spacing: 2px; font-variant-numeric: tabular-nums; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 240, 255, 0.3); padding: 8px 18px; border-radius: 8px; backdrop-filter: blur(8px); box-shadow: 0 0 15px rgba(0,240,255,0.1); display: flex; align-items: center; }
+        .live-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-red); margin-right: 12px; box-shadow: 0 0 8px var(--accent-red); animation: pulse-ring 1.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1); }
 
-        /* ==================================================
-           FONDOS ABSTRACTOS FLUIDOS (COMO EN LA IMAGEN)
-           ================================================== */
-        .bg-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            z-index: 0;
-            animation: flotar 15s infinite alternate ease-in-out;
-        }
-        .orb-1 {
-            top: -10vh; left: -10vw;
-            width: 50vw; height: 50vw;
-            background: rgba(39, 100, 149, 0.3); /* Azul ambiental */
-        }
-        .orb-2 {
-            bottom: -20vh; right: -10vw;
-            width: 60vw; height: 60vw;
-            background: rgba(118, 42, 41, 0.25); /* Bordó ambiental */
-            animation-delay: -5s;
-        }
-        .orb-3 {
-            top: 40vh; left: 30vw;
-            width: 40vw; height: 40vw;
-            background: rgba(161, 228, 237, 0.1); /* Celeste suave en el centro */
-            animation-delay: -10s;
-        }
+        #pantalla-setup { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; gap: 40px; }
+        .qr-gigante { background: rgba(0, 240, 255, 0.05); border: 2px solid var(--accent-cyan); padding: 20px; border-radius: 16px; box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); text-align: center; }
+        .qr-url { font-family: 'Chakra Petch'; font-size: 1.5rem; color: var(--accent-cyan); margin-top: 15px; font-weight: bold; letter-spacing: 2px; }
+        
+        #roster-preview { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; max-width: 80%; }
+        .roster-tag { background: rgba(0, 240, 255, 0.1); border: 1px solid var(--accent-cyan); color: #fff; padding: 10px 25px; border-radius: 8px; font-family: 'Chakra Petch'; font-size: 1.5rem; font-weight: bold; text-transform: uppercase; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); animation: fade-in 0.3s ease-out forwards; }
+        @keyframes fade-in { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
 
-        @keyframes flotar {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(5vw, 5vh) scale(1.1); }
-        }
+        #pantalla-juego { display: none; flex: 1; flex-direction: column; z-index: 10; }
+        .sub-header { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
+        #ronda-titulo { font-family: 'Chakra Petch', sans-serif; font-size: 3.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; background: linear-gradient(90deg, var(--accent-red), #ff88aa); -webkit-background-clip: text; color: transparent; text-shadow: 0 0 20px rgba(255, 0, 85, 0.3); }
         
-        /* ==================================================
-           ENCABEZADO FLOTANTE EFECTO CRISTAL (GLASSMORPHISM)
-           ================================================== */
-        .header { 
-            /* En vez de un bloque sólido, es un cristal flotante */
-            background: rgba(39, 100, 149, 0.15); 
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(161, 228, 237, 0.2);
-            border-radius: 20px;
-            
-            display: flex; justify-content: space-between; align-items: center; 
-            flex-wrap: wrap; 
-            padding: 1vh 2vh; 
-            margin: 2vh 2vh 0 2vh;
-            height: 6vh; 
-            box-sizing: border-box;
-            flex-shrink: 0; gap: 1vh 2vh; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            z-index: 10;
-        }
+        #contenedor-principal { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; padding-right: 10px; }
+        .arena-principal { width: 100%; display: grid; grid-template-columns: 1fr; gap: 22px; margin: auto 0; align-content: center; }
         
-        .logo-container { display: flex; align-items: center; gap: 1.5vh; min-width: 0; }
-        .logo-img { height: 4vh; border-radius: 8px; background: rgba(255,255,255,0.9); padding: 3px; flex-shrink: 0; box-shadow: 0 0 10px rgba(255,255,255,0.2);}
-        .header h1 { margin: 0; font-size: min(3vh, 5vw); font-weight: 800; white-space: nowrap; color: var(--celeste-lmi); letter-spacing: 2px;}
-        
-        /* Botón de la IP con estilo futurista */
-        .ip-info { 
-            font-size: min(1.5vh, 2.8vw); font-family: monospace; font-weight: bold; 
-            background: linear-gradient(90deg, rgba(249,32,33,0.2), rgba(118,42,41,0.2));
-            border: 1px solid var(--rojo-destello);
-            color: white; padding: 0.5vh 1.5vh; border-radius: 20px; white-space: nowrap; 
-            box-shadow: 0 0 15px rgba(249,32,33,0.3);
-        }
-        
-        /* CONTENEDOR PRINCIPAL */
-        #fixture-container { 
-            flex: 1; display: flex; flex-direction: column; 
-            gap: calc(3vh / var(--r)); padding: calc(3vh / var(--r)) 2vh; 
-            box-sizing: border-box; min-height: 0; z-index: 10;
-        }
+        .mesa-card:nth-child(1) { --c-mesa: #00f0ff; --c-mesa-rgb: 0, 240, 255; }
+        .mesa-card:nth-child(2) { --c-mesa: #00ff88; --c-mesa-rgb: 0, 255, 136; }
+        .mesa-card:nth-child(3) { --c-mesa: #ff00ff; --c-mesa-rgb: 255, 0, 255; }
+        .mesa-card:nth-child(4) { --c-mesa: #ffaa00; --c-mesa-rgb: 255, 170, 0; }
+        .mesa-card { background: linear-gradient(135deg, rgba(var(--c-mesa-rgb),0.08) 0%, rgba(8,12,22,0.94) 30%, rgba(8,12,22,0.94) 70%, rgba(255,0,85,0.08) 100%); border: 1px solid rgba(var(--c-mesa-rgb), 0.4); border-radius: 16px; padding: 30px 30px; display: flex; flex-direction: column; justify-content: center; position: relative; min-height: 120px; animation: entradaEpica 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+        @keyframes entradaEpica { 0% { opacity: 0; transform: translateY(30px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        .mesa-badge { position: absolute; top: -14px; left: 30px; z-index: 5; background: var(--c-mesa); color: #000; font-family: 'Chakra Petch', sans-serif; font-weight: 900; padding: 4px 25px; font-size: 1.3rem; letter-spacing: 2px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); box-shadow: 0 0 15px rgba(var(--c-mesa-rgb), 0.6); }
+        .enfrentamiento { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; z-index: 5; position: relative; }
+        .jugador { font-size: 4.2rem; font-weight: 900; width: 40%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 1px; transform: skewX(-10deg); font-style: italic; padding: 0 10px; }
+        .enfrentamiento .jugador:first-child { text-shadow: 0 0 20px rgba(0,240,255,0.4), 2px 2px 4px rgba(0,0,0,0.8); } .enfrentamiento .jugador:last-child { text-shadow: 0 0 20px rgba(255,0,85,0.4), 2px 2px 4px rgba(0,0,0,0.8); }
+        .vs-container { position: relative; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .vs { font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: var(--accent-red); font-size: 1.8rem; z-index: 2; -webkit-text-stroke: 1px rgba(255,255,255,0.3); text-shadow: 0 0 15px rgba(255, 0, 85, 0.8); }
+        .vs-ring { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid var(--accent-red); border-radius: 50%; animation: pulse-ring 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1); }
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; box-shadow: 0 0 10px var(--accent-red); } 100% { transform: scale(1.6); opacity: 0; box-shadow: 0 0 30px var(--accent-red); } }
 
-        /* ==================================================
-           SALA DE ESPERA (MEDALLAS GLOW)
-           ================================================== */
-        .espera-container { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 100%; width: 100%; padding-top: 5vh; box-sizing: border-box; }
-        .espera-titulo { font-size: 5vh; color: white; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 1vh; text-shadow: 0 0 20px rgba(161, 228, 237, 0.5); }
-        .espera-contador { font-size: 2.5vh; color: var(--celeste-lmi); margin-bottom: 6vh; background: rgba(39,100,149,0.2); border: 1px solid rgba(161,228,237,0.3); padding: 1vh 3vh; border-radius: 30px; backdrop-filter: blur(10px);}
-        .jugadores-grid { display: flex; flex-wrap: wrap; gap: 3vh; justify-content: center; width: 90%; align-content: flex-start; }
-        
-        .jugador-badge {
-            background: linear-gradient(135deg, rgba(39, 100, 149, 0.6) 0%, rgba(118, 42, 41, 0.6) 100%);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 2vh 4vh; border-radius: 16px; font-size: 3.5vh; font-weight: bold; color: white;
-            text-transform: capitalize; 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
-            animation: aparecer 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            backdrop-filter: blur(10px);
-        }
-        @keyframes aparecer { 0% { transform: scale(0.8) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-        
-        /* ==================================================
-           ESTILOS DEL TORNEO (EL EFECTO DE LA IMAGEN)
-           ================================================== */
-        .ronda-card { 
-            flex: 1; 
-            border-radius: 16px; 
-            display: flex; flex-direction: column; 
-            padding: calc(4vh / var(--r)); 
-            box-sizing: border-box; min-height: 0; 
-            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
+        #flash-cortina { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: rgba(3, 5, 10, 0.98); display: flex; justify-content: center; align-items: center; pointer-events: none; clip-path: polygon(0 0, 0 0, -20% 100%, -20% 100%); transition: clip-path 0.2s cubic-bezier(0.77, 0, 0.175, 1); }
+        #flash-cortina::after { content: ''; position: absolute; top: 0; right: 0; width: 150vw; height: 100vh; background: linear-gradient(90deg, transparent, rgba(0,240,255,0.8), transparent); transform: skewX(-20deg) translateX(-150%); transition: transform 0.2s ease-in-out; }
+        #flash-cortina.activo { clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); } #flash-cortina.activo::after { transform: skewX(-20deg) translateX(150%); }
+        .cartel-epico { font-family: 'Chakra Petch', sans-serif; font-size: 6rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 8px; text-shadow: 0 0 40px var(--accent-cyan), 0 0 80px var(--accent-red); transform: scale(0.8); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #flash-cortina.activo .cartel-epico { transform: scale(1); }
+        .glitch { position: relative; } .glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 5, 10, 0.98); overflow: hidden; }
+        .glitch::before { left: 4px; text-shadow: -2px 0 var(--accent-cyan); clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); animation: glitch-anim 0.2s infinite linear alternate-reverse; }
+        .glitch::after { left: -4px; text-shadow: -2px 0 var(--accent-red); clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%); animation: glitch-anim 0.3s infinite linear alternate-reverse; }
+        @keyframes glitch-anim { 0% { transform: translate(0); } 20% { transform: translate(-3px, 2px); } 40% { transform: translate(-3px, -2px); } 60% { transform: translate(3px, 2px); } 80% { transform: translate(3px, -2px); } 100% { transform: translate(0); } }
 
-        /* RONDA INACTIVA: Cristal oscuro, bordes tenues */
-        .ronda-card.inactiva {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            opacity: 0.6;
-            transform: scale(0.98);
-        }
+        footer { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px; margin-top: 20px; display: flex; flex-direction: column; align-items: center; font-size: 1.2rem; gap: 12px; z-index: 10; }
+        .tag-descanso { display: inline-flex; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.15); color: #888; padding: 4px 14px; border-radius: 6px; font-family: 'Chakra Petch', sans-serif; font-weight: 700; margin: 0 6px; position: relative; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+        .tag-descanso::before { content: ''; display: inline-block; width: 8px; height: 8px; background: rgba(255, 0, 85, 0.5); border-radius: 50%; margin-right: 8px; box-shadow: 0 0 5px rgba(255, 0, 85, 0.5); }
+        #proxima-info { font-weight: 700; color: var(--accent-cyan); background: rgba(0, 240, 255, 0.05); padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.15); display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; box-sizing: border-box; }
+        .mesa-proxima-tag { background: rgba(0, 240, 255, 0.1); padding: 4px 10px; border-radius: 4px; white-space: nowrap; font-family: 'Chakra Petch', sans-serif; }
+        
+        .ticker-wrap { width: 100vw; margin-left: -40px; background: rgba(0, 0, 0, 0.8); border-top: 1px solid rgba(0, 240, 255, 0.4); border-bottom: 1px solid rgba(0, 240, 255, 0.4); padding: 8px 0; overflow: hidden; position: relative; display: flex; margin-top: auto; z-index: 10; }
+        .ticker { display: inline-block; white-space: nowrap; font-family: 'Chakra Petch', sans-serif; color: var(--accent-cyan); font-weight: 700; font-size: 1.2rem; letter-spacing: 3px; text-transform: uppercase; padding-left: 100%; animation: ticker-scroll 25s linear infinite; text-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+        @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
-        /* RONDA ACTIVA: El degradado futurista y brillante de la referencia */
-        .ronda-card.activa {
-            background: linear-gradient(135deg, rgba(39,100,149,0.5) 0%, rgba(118,42,41,0.5) 100%);
-            border: 1px solid rgba(161, 228, 237, 0.4);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(249, 32, 33, 0.2);
-            opacity: 1;
-            transform: scale(1.02);
-            z-index: 2;
+        /* NUEVO: ESTILOS PARA LA BARRA DE CARGA DEL GESTO */
+        #indicador-gesto {
+            position: fixed; top: 100px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.85); border: 1px solid var(--accent-cyan);
+            padding: 10px 20px; border-radius: 8px; z-index: 10000;
+            display: none; flex-direction: column; align-items: center; gap: 8px;
+            box-shadow: 0 0 20px rgba(0,240,255,0.4);
         }
-        
-        .ronda-title { 
-            color: white; font-size: calc(14vh / var(--r)); font-weight: 800; 
-            margin: 0 0 calc(2vh / var(--r)) 0; 
-            flex-shrink: 0; text-transform: uppercase; letter-spacing: 3px; 
-            transition: all 0.4s;
-        }
-        /* Solo le ponemos la línea inferior a la activa para que destaque más */
-        .activa .ronda-title { border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: calc(1vh / var(--r)); text-shadow: 0 0 10px rgba(255,255,255,0.3); }
-        .inactiva .ronda-title { color: #888; }
-        
-        .mesas-wrapper { display: flex; flex: 1; gap: 1.5vh; min-height: 0; }
-        
-        /* MESAS: Sub-tarjetas de cristal oscuro adentro de la tarjeta principal */
-        .mesa-item { 
-            flex: 1; 
-            background: rgba(0, 0, 0, 0.4); 
-            border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            padding: calc(3vh / var(--r)); min-height: 0; min-width: 0; container-type: inline-size; 
-            transition: all 0.4s;
-        }
-        
-        .mesa-num { 
-            color: var(--celeste-lmi); font-size: min(5cqi, calc(9vh / var(--r))); margin-bottom: calc(1vh / var(--r)); 
-            font-weight: 700; flex-shrink: 0; text-transform: uppercase; letter-spacing: 3px;
-        }
-        .inactiva .mesa-num { color: #555; }
-        
-        .matchup { display: flex; flex-direction: row; align-items: center; justify-content: center; width: 100%; font-weight: 800; font-size: min(10.5cqi, calc(18vh / var(--r))); min-width: 0; }
-        .nombre-p1, .nombre-p2 { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: capitalize; min-width: 0; color: white; }
-        .nombre-p1 { text-align: right; }
-        .nombre-p2 { text-align: left; }
-        .inactiva .nombre-p1, .inactiva .nombre-p2 { color: #888; }
-        
-        /* BOTÓN VS FUTURISTA */
-        .vs { 
-            background: linear-gradient(135deg, var(--rojo-destello), var(--rojo-oscuro));
-            color: white; font-size: 0.35em; padding: 0.4em 1em;
-            border-radius: 30px; margin: 0 2.5cqi; flex-shrink: 0; transition: all 0.3s;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 4px 15px rgba(249, 32, 33, 0.4);
-        }
-        .inactiva .vs { background: #222; border-color: #333; color: #555; box-shadow: none; }
-        
-        .activa .vs { animation: pulsarNeom 2s infinite; }
-
-        @keyframes pulsarNeom {
-            0% { transform: scale(1); box-shadow: 0 0 15px rgba(249, 32, 33, 0.4); }
-            50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(249, 32, 33, 0.8), 0 0 10px white; }
-            100% { transform: scale(1); box-shadow: 0 0 15px rgba(249, 32, 33, 0.4); }
-        }
-        
-        .descanso-bar { 
-            margin-top: calc(3vh / var(--r)); 
-            background: rgba(0, 0, 0, 0.2); 
-            border-radius: 8px; text-align: center; 
-            padding: calc(2vh / var(--r));
-            font-size: calc(11vh / var(--r)); color: #aaa; flex-shrink: 0;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .activa .descanso-bar { color: white; background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); }
-        
-        .msj-vacio { font-size: 4vh; color: #888; display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; z-index: 10; }
+        #indicador-texto { font-family: 'Chakra Petch'; color: var(--accent-cyan); font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; }
+        #indicador-barra { width: 250px; height: 12px; background: #222; border-radius: 6px; overflow: hidden; border: 1px solid #444; }
+        #indicador-progreso { width: 0%; height: 100%; background: var(--accent-red); transition: width 0.1s linear; box-shadow: 0 0 10px var(--accent-red); }
     </style>
 </head>
 <body>
-    <!-- FONDOS ABSTRACTOS DE COLOR -->
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-    <div class="bg-orb orb-3"></div>
+    <div class="bg-blobs"><div class="blob-cyan"></div><div class="blob-red"></div></div>
+    <div class="bg-grid"></div>
+    <div class="hud-corners"><span></span></div>
+    
+    <!-- NUEVO: HUD INDICADOR DE GESTO DE CÁMARA -->
+    <div id="indicador-gesto">
+        <div id="indicador-texto">DETECTANDO GESTO...</div>
+        <div id="indicador-barra"><div id="indicador-progreso"></div></div>
+    </div>
 
-    <div class="header">
+    <div id="flash-cortina"><div class="cartel-epico glitch" id="texto-cortina" data-text="¡NUEVA RONDA!">¡NUEVA RONDA!</div></div>
+
+    <header>
         <div class="logo-container">
-            <img src="/static/Logo-LMI.png" alt="Logo LMI" class="logo-img">
-            <h1>LA MESITA</h1>
+            <img src="/static/logo-lmi.png" class="club-logo" alt="LMI" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';">
+            <div class="logo-placeholder" id="logo-fallback" style="display: none;">LMI</div>
+            <h1>Arena</h1>
         </div>
-        <div class="ip-info">📲 <span id="ip-texto">Cargando...</span></div>
+        <div id="reloj-digital"><span class="live-dot"></span><span id="reloj-texto">00:00:00</span></div>
+    </header>
+
+    <div id="pantalla-setup">
+        <div class="qr-gigante">
+            <canvas id="qr-admin"></canvas>
+            <div class="qr-url" id="qr-texto-url">ESCANEAR PARA ADMIN</div>
+        </div>
+        <div id="roster-preview"></div>
     </div>
 
-    <div id="fixture-container">
-        <div class="msj-vacio">Esperando conexión...</div>
+    <div id="pantalla-juego">
+        <div class="sub-header">
+            <div id="ronda-titulo">RONDA -</div>
+        </div>
+        <div id="contenedor-principal"></div>
+        <footer>
+            <div id="descansan-info">Descansan: -</div>
+            <div id="proxima-info">Próxima fecha: -</div>
+        </footer>
     </div>
+
+    <div class="ticker-wrap"><div class="ticker" id="ticker-texto">CONECTANDO SISTEMA...</div></div>
+
+    <!-- WEBCAM OCULTA -->
+    <video id="webcam" autoplay muted style="display:none;"></video>
 
     <script>
-        let hashAnterior = "";
+        function actualizarReloj() {
+            const ahora = new Date();
+            document.getElementById('reloj-texto').innerText = 
+                `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}:${String(ahora.getSeconds()).padStart(2,'0')}`;
+        }
+        setInterval(actualizarReloj, 1000); actualizarReloj();
 
-        async function actualizarPantalla() {
-            try {
-                const response = await fetch('/api/estado');
-                const data = await response.json();
-                
-                const ipLimpia = data.ip_admin.replace("http://", "");
-                document.getElementById('ip-texto').innerText = ipLimpia;
-                
-                const container = document.getElementById('fixture-container');
-                
-                if (!data.rondas || data.rondas.length === 0) {
-                    const hashJugadores = "JUGADORES:" + JSON.stringify(data.jugadores);
-                    if (hashAnterior === hashJugadores) return; 
-                    hashAnterior = hashJugadores;
+        let ultimoJsonString = "";
+        let qrGenerado = false;
+        let estadoActualStr = "";
 
-                    if (data.jugadores.length > 0) {
-                        let badges = data.jugadores.map(j => `<div class="jugador-badge">${j}</div>`).join('');
-                        container.innerHTML = `
-                            <div class="espera-container">
-                                <div class="espera-titulo">Jugadores Anotados</div>
-                                <div class="espera-contador">Total: <span style="color: white; font-weight: bold;">${data.jugadores.length}</span></div>
-                                <div class="jugadores-grid">${badges}</div>
+        function mostrarCortinaEpica(numeroRonda) {
+            let cortina = document.getElementById('flash-cortina');
+            let textoCortina = document.getElementById('texto-cortina');
+            let texto = `RONDA ${numeroRonda}`;
+            textoCortina.innerText = texto;
+            textoCortina.setAttribute('data-text', texto);
+            cortina.classList.add('activo');
+            setTimeout(() => { cortina.classList.remove('activo'); }, 700); 
+        }
+
+        function renderizarSetup(data) {
+            document.getElementById('pantalla-setup').style.display = 'flex';
+            document.getElementById('pantalla-juego').style.display = 'none';
+            
+            if (!qrGenerado && data.ip_local) {
+                let adminUrl = `http://${data.ip_local}:5050/admin`;
+                new QRious({ element: document.getElementById('qr-admin'), value: adminUrl, size: 250, background: 'transparent', foreground: '#00f0ff' });
+                document.getElementById('qr-texto-url').innerText = adminUrl;
+                qrGenerado = true;
+            }
+
+            let rosterHtml = data.jugadores.map(j => `<div class="roster-tag">${j}</div>`).join('');
+            if (rosterHtml === "") rosterHtml = '<div style="color: #888; font-style: italic;">Esperando jugadores...</div>';
+            document.getElementById('roster-preview').innerHTML = rosterHtml;
+        }
+
+        function renderizarJuego(data) {
+            document.getElementById('pantalla-setup').style.display = 'none';
+            document.getElementById('pantalla-juego').style.display = 'flex';
+            document.getElementById('ronda-titulo').innerText = `RONDA ${data.numero_ronda}`;
+
+            let htmlPartidos = '<div class="arena-principal">';
+            data.ronda_actual.partidos.forEach(p => {
+                htmlPartidos += `
+                    <div class="mesa-card">
+                        <div class="mesa-badge">MESA ${p.mesa}</div>
+                        <div class="enfrentamiento">
+                            <div class="jugador">${p.jugador1}</div>
+                            <div class="vs-container">
+                                <div class="vs-ring"></div><div class="vs">VS</div>
                             </div>
-                        `;
-                    } else {
-                        container.innerHTML = '<div class="msj-vacio">Esperando que se anoten los jugadores...</div>';
-                    }
-                    return;
-                }
-
-                const hashRondas = "RONDAS:" + JSON.stringify(data.rondas);
-
-                if (hashRondas === hashAnterior) {
-                    document.querySelectorAll('.ronda-card').forEach((card, index) => {
-                        if (index === data.ronda_activa) {
-                            card.classList.add('activa');
-                            card.classList.remove('inactiva');
-                        } else {
-                            card.classList.add('inactiva');
-                            card.classList.remove('activa');
-                        }
-                    });
-                    return; 
-                }
-                
-                hashAnterior = hashRondas;
-                
-                const divisorMatematico = Math.max(5, data.rondas.length);
-                document.documentElement.style.setProperty('--r', divisorMatematico);
-
-                let htmlContent = '';
-                data.rondas.forEach((ronda, index) => {
-                    let partidosHtml = '';
-                    ronda.partidos.forEach(p => {
-                        partidosHtml += `
-                            <div class="mesa-item">
-                                <div class="mesa-num">MESA ${p.mesa}</div>
-                                <div class="matchup">
-                                    <div class="nombre-p1">${p.jugador1}</div>
-                                    <div class="vs">VS</div>
-                                    <div class="nombre-p2">${p.jugador2}</div>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    let descansanHtml = ronda.descansan.length > 0 
-                        ? `<span style="text-transform: capitalize; font-weight: bold; letter-spacing: 1px;">DESCANSAN: ${ronda.descansan.join(', ')}</span>` 
-                        : `<span style="font-weight: bold; letter-spacing: 1px;">DESCANSAN: NADIE</span>`;
-
-                    const estadoClase = index === data.ronda_activa ? 'activa' : 'inactiva';
-
-                    htmlContent += `
-                        <div class="ronda-card ${estadoClase}">
-                            <div class="ronda-title">RONDA ${ronda.numero}</div>
-                            <div class="mesas-wrapper">
-                                ${partidosHtml}
-                            </div>
-                            <div class="descanso-bar">${descansanHtml}</div>
+                            <div class="jugador">${p.jugador2}</div>
                         </div>
-                    `;
-                });
+                    </div>`;
+            });
+            htmlPartidos += '</div>';
+            document.getElementById('contenedor-principal').innerHTML = htmlPartidos;
 
-                container.innerHTML = htmlContent;
-            } catch (error) {
-                console.error("Error conectando:", error);
+            let descansan = data.ronda_actual.descansan;
+            let dTexto = (descansan && descansan.length > 0) ? descansan.map(j => `<span class="tag-descanso">${j}</span>`).join('') : '<span style="color:#555;">NINGUNO</span>';
+            document.getElementById('descansan-info').innerHTML = `<span style="font-weight: 900; color: var(--accent-gold); margin-right:10px;">BANCA:</span> ${dTexto}`;
+            
+            if (data.proxima_ronda && data.proxima_ronda.partidos.length > 0) {
+                let prox = `<span>PRÓX. (RONDA ${data.proxima_ronda.numero}):</span>`;
+                data.proxima_ronda.partidos.forEach(p => { prox += `<span class="mesa-proxima-tag">Mesa ${p.mesa}: ${p.jugador1} vs ${p.jugador2}</span>`; });
+                document.getElementById('proxima-info').innerHTML = prox;
             }
         }
 
-        setInterval(actualizarPantalla, 2000);
-        actualizarPantalla();
+        async function loop() {
+            try {
+                let res = await fetch('/api/estado');
+                let data = await res.json();
+                let nuevoJsonString = JSON.stringify(data);
+
+                if (nuevoJsonString === ultimoJsonString) return; 
+                ultimoJsonString = nuevoJsonString;
+
+                document.getElementById('ticker-texto').innerText = data.ticker_msg;
+
+                if (data.estado === 'setup') {
+                    renderizarSetup(data);
+                    estadoActualStr = 'setup';
+                } else {
+                    if (estadoActualStr === 'setup' || (estadoActualStr === 'jugando' && !document.getElementById('ronda-titulo').innerText.includes(data.numero_ronda))) {
+                        mostrarCortinaEpica(data.numero_ronda);
+                        setTimeout(() => { renderizarJuego(data); }, 200);
+                    } else {
+                        renderizarJuego(data); 
+                    }
+                    estadoActualStr = 'jugando';
+                }
+            } catch (e) { console.error("Error", e); }
+        }
+        setInterval(loop, 1000);
+
+        // --- WEBCAM: LÓGICA MEJORADA CON COOLDOWN Y BARRA ---
+        let video = document.getElementById('webcam');
+        let canvas = document.createElement('canvas');
+        let ctx = canvas.getContext('2d');
+        
+        let inicioOscuro = null;
+        let cooldownCamara = false; // Variable para evitar el doble salto
+        const TIEMPO_REQUERIDO = 1000; // 1 segundo tapando
+        const TIEMPO_COOLDOWN = 3000; // 3 segundos de gracia para sacar la mano
+
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+            video.srcObject = stream;
+            console.log("Cámara detectada y lista");
+            requestAnimationFrame(chequearBrillo);
+        }).catch(err => console.error("Chrome bloqueó la cámara.", err));
+
+        function chequearBrillo() {
+            if (estadoActualStr !== 'jugando') {
+                requestAnimationFrame(chequearBrillo); return;
+            }
+
+            // Si estamos en cooldown, ignoramos lo que vea la cámara
+            if (cooldownCamara) {
+                requestAnimationFrame(chequearBrillo); return;
+            }
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let sumaLuma = 0;
+                for (let i = 0; i < frame.data.length; i += 40) {
+                    let r = frame.data[i], g = frame.data[i+1], b = frame.data[i+2];
+                    sumaLuma += (0.299*r + 0.587*g + 0.114*b);
+                }
+                let promedioLuma = sumaLuma / (frame.data.length / 40);
+
+                let hudGesto = document.getElementById('indicador-gesto');
+                let hudProgreso = document.getElementById('indicador-progreso');
+
+                if (promedioLuma < 25) { 
+                    if (!inicioOscuro) {
+                        inicioOscuro = Date.now();
+                        hudGesto.style.display = 'flex'; // Mostramos la barra
+                    } else {
+                        let tiempoPasado = Date.now() - inicioOscuro;
+                        let porcentaje = Math.min((tiempoPasado / TIEMPO_REQUERIDO) * 100, 100);
+                        hudProgreso.style.width = porcentaje + '%'; // Llenamos la barra
+                        
+                        if (tiempoPasado >= TIEMPO_REQUERIDO) { 
+                            // Llegó al 100%, disparamos la acción
+                            fetch('/api/avanzar', { method: 'POST' });
+                            inicioOscuro = null;
+                            hudGesto.style.display = 'none';
+                            hudProgreso.style.width = '0%';
+                            
+                            // Activamos el cooldown de 3 segundos
+                            cooldownCamara = true;
+                            setTimeout(() => { cooldownCamara = false; }, TIEMPO_COOLDOWN);
+                        }
+                    }
+                } else {
+                    // Si se sacó la mano antes del segundo, reseteamos todo
+                    inicioOscuro = null;
+                    hudGesto.style.display = 'none';
+                    hudProgreso.style.width = '0%';
+                }
+            }
+            requestAnimationFrame(chequearBrillo);
+        }
     </script>
 </body>
 </html>

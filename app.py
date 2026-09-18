@@ -1,29 +1,60 @@
-from flask import Flask, render_template, request, jsonify
+import os
 import random
-import socket
-import webbrowser
 import threading
+import webbrowser
+import socket
+import logging
+from flask import Flask, render_template, request, jsonify
 
-app = Flask(__name__)
+# Silenciamos la consola para no saturar
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
-jugadores = []
-rondas_generadas = []
-ronda_actual_idx = 0 # Memoria de la ronda que se está jugando
-
-def obtener_ip_local():
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
     except Exception:
-        return "127.0.0.1"
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
-IP_LOCAL = obtener_ip_local()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+
+app = Flask(__name__, template_folder=TEMPLATES_DIR, static_folder=os.path.join(BASE_DIR, 'static'))
+
+estado_global = {
+    "estado": "setup", 
+    "jugadores": [],
+    "ronda_actual": None,
+    "proxima_ronda": None,
+    "numero_ronda": 0,
+    "ticker_msg": "BIENVENIDOS A LA MESITA ARENA /// MANTENER LA LIMPIEZA DEL SALÓN",
+    "ip_local": get_ip()
+}
+
+def generar_ronda(jugadores, num_ronda):
+    j_mezclados = list(jugadores)
+    random.shuffle(j_mezclados)
+    partidos = []
+    
+    while len(j_mezclados) >= 2 and len(partidos) < 4:
+        partidos.append({
+            "mesa": len(partidos) + 1,
+            "jugador1": j_mezclados.pop(0),
+            "jugador2": j_mezclados.pop(0)
+        })
+    return {
+        "numero": num_ronda,
+        "partidos": partidos,
+        "descansan": j_mezclados
+    }
 
 @app.route('/')
-def pantalla():
+def index():
     return render_template('pantalla.html')
 
 @app.route('/admin')
@@ -31,113 +62,59 @@ def admin():
     return render_template('admin.html')
 
 @app.route('/api/estado', methods=['GET'])
-def obtener_estado():
-    # Averiguamos la IP fresca en este preciso momento
-    ip_fresca = obtener_ip_local() 
-    
-    return jsonify({
-        "jugadores": jugadores,
-        "rondas": rondas_generadas,
-        "ronda_activa": ronda_actual_idx, 
-        "ip_admin": f"http://{ip_fresca}:5000/admin" # Usamos la nueva variable
-    })
+def get_estado():
+    return jsonify(estado_global)
 
-@app.route('/api/agregar', methods=['POST'])
+@app.route('/api/agregar_jugador', methods=['POST'])
 def agregar_jugador():
-    nombre = request.json.get('nombre')
-    if nombre and nombre not in jugadores:
-        jugadores.append(nombre)
+    data = request.get_json(silent=True) or {}
+    jugador = data.get('jugador', '').strip()
+    if jugador and jugador not in estado_global['jugadores']:
+        estado_global['jugadores'].append(jugador)
     return jsonify({"status": "ok"})
 
-@app.route('/api/eliminar', methods=['POST'])
-def eliminar_jugador():
-    global rondas_generadas, ronda_actual_idx
-    nombre = request.json.get('nombre')
-    if nombre in jugadores:
-        jugadores.remove(nombre)
-    rondas_generadas = []
-    ronda_actual_idx = 0
+@app.route('/api/quitar_jugador', methods=['POST'])
+def quitar_jugador():
+    data = request.get_json(silent=True) or {}
+    jugador = data.get('jugador', '').strip()
+    if jugador in estado_global['jugadores']:
+        estado_global['jugadores'].remove(jugador)
+        if estado_global['estado'] == 'jugando':
+            estado_global['proxima_ronda'] = generar_ronda(estado_global['jugadores'], estado_global['numero_ronda'] + 1)
     return jsonify({"status": "ok"})
 
-@app.route('/api/armar_partidos', methods=['POST'])
-def generar_fixture():
-    global rondas_generadas, ronda_actual_idx
-    rondas_generadas = []
-    ronda_actual_idx = 0 # Si sorteamos de nuevo, volvemos a iluminar la Ronda 1
+@app.route('/api/iniciar', methods=['POST'])
+def iniciar():
+    if len(estado_global['jugadores']) < 2:
+        return jsonify({"error": "Mínimo 2 jugadores"}), 400
     
-    if len(jugadores) < 2:
-        return jsonify({"status": "error"})
-
-    CANTIDAD_MESAS = 4 if len(jugadores) >= 9 else 3
-
-    jugadores_rr = jugadores.copy()
-    random.shuffle(jugadores_rr)
-    
-    if len(jugadores_rr) % 2 != 0:
-        jugadores_rr.append("DESCANSO")
-        
-    n = len(jugadores_rr)
-    total_rondas = n - 1
-    
-    for i in range(total_rondas):
-        matchups_temporales = []
-        descansan_ronda = []
-        
-        for j in range(n // 2):
-            p1 = jugadores_rr[j]
-            p2 = jugadores_rr[n - 1 - j]
-            
-            if p1 == "DESCANSO":
-                descansan_ronda.append(p2)
-            elif p2 == "DESCANSO":
-                descansan_ronda.append(p1)
-            else:
-                matchups_temporales.append((p1, p2))
-                
-        partidos_a_jugar = []
-        if len(matchups_temporales) > CANTIDAD_MESAS:
-            partidos_a_jugar = matchups_temporales[:CANTIDAD_MESAS]
-            for p1, p2 in matchups_temporales[CANTIDAD_MESAS:]:
-                descansan_ronda.extend([p1, p2])
-        else:
-            partidos_a_jugar = matchups_temporales
-            
-        partidos_ronda = []
-        for idx, (p1, p2) in enumerate(partidos_a_jugar):
-            mesa_asignada = ((idx + i) % CANTIDAD_MESAS) + 1
-            if random.choice([True, False]):
-                partidos_ronda.append({"mesa": mesa_asignada, "jugador1": p1, "jugador2": p2})
-            else:
-                partidos_ronda.append({"mesa": mesa_asignada, "jugador1": p2, "jugador2": p1})
-        
-        partidos_ronda = sorted(partidos_ronda, key=lambda x: x["mesa"])
-        
-        rondas_generadas.append({
-            "numero": i + 1,
-            "partidos": partidos_ronda,
-            "descansan": descansan_ronda
-        })
-        
-        jugadores_rr = [jugadores_rr[0]] + [jugadores_rr[-1]] + jugadores_rr[1:-1]
-
+    estado_global['estado'] = 'jugando'
+    estado_global['numero_ronda'] = 1
+    estado_global['ronda_actual'] = generar_ronda(estado_global['jugadores'], 1)
+    estado_global['proxima_ronda'] = generar_ronda(estado_global['jugadores'], 2)
     return jsonify({"status": "ok"})
 
-# NUEVA RUTA PARA EL CELULAR: Avanzar o retroceder la iluminación
-@app.route('/api/cambiar_ronda', methods=['POST'])
-def cambiar_ronda():
-    global ronda_actual_idx
-    direccion = request.json.get('dir')
-    
-    if direccion == 'sig' and ronda_actual_idx < len(rondas_generadas) - 1:
-        ronda_actual_idx += 1
-    elif direccion == 'ant' and ronda_actual_idx > 0:
-        ronda_actual_idx -= 1
-        
+@app.route('/api/avanzar', methods=['POST'])
+def avanzar_ronda():
+    if estado_global['estado'] == 'jugando':
+        estado_global['numero_ronda'] += 1
+        estado_global['ronda_actual'] = estado_global['proxima_ronda']
+        estado_global['proxima_ronda'] = generar_ronda(estado_global['jugadores'], estado_global['numero_ronda'] + 1)
+    return jsonify({"status": "ok"})
+
+@app.route('/api/ticker', methods=['POST'])
+def actualizar_ticker():
+    data = request.get_json(silent=True) or {}
+    estado_global['ticker_msg'] = data.get('ticker', '')
     return jsonify({"status": "ok"})
 
 def abrir_navegador():
-    webbrowser.open_new(f"http://{IP_LOCAL}:5000/")
+    # ACÁ ESTÁ EL TRUCO: Usamos 127.0.0.1 para que Chrome NO bloquee la cámara.
+    webbrowser.open('http://127.0.0.1:5050/')
 
 if __name__ == '__main__':
-    threading.Timer(1.5, abrir_navegador).start()
-    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
+    ip_real = estado_global['ip_local']
+    print(f"🚀 INICIANDO SISTEMA LMI...")
+    print(f"📱 ADMIN (Celu):  http://{ip_real}:5050/admin")
+    threading.Timer(1.2, abrir_navegador).start()
+    app.run(host='0.0.0.0', port=5050, debug=False)
