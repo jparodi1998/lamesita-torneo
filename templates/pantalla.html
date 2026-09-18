@@ -8,12 +8,14 @@
     <style>
         :root { --bg-arena: #050811; --accent-cyan: #00f0ff; --accent-red: #ff0055; --accent-gold: #ffaa00; --text-main: #ffffff; }
         
-        /* FONDO ESTÁTICO Y LIMPIO */
         body { margin: 0; padding: 30px 40px 0 40px; background-color: var(--bg-arena); color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* ESQUINAS ESTÁTICAS */
+        /* FONDO MÓVIL OPTIMIZADO (GPU Accelerated) */
+        .bg-grid { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; z-index: -2; background-image: linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px); background-size: 50px 50px; transform: perspective(800px) rotateX(60deg); animation: grid-slide 15s linear infinite; }
+        @keyframes grid-slide { 0% { transform: perspective(800px) rotateX(60deg) translateY(0); } 100% { transform: perspective(800px) rotateX(60deg) translateY(50px); } }
+
         .hud-corners { position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px; pointer-events: none; z-index: 9997; }
-        .hud-corners::before, .hud-corners::after, .hud-corners span::before, .hud-corners span::after { content: ''; position: absolute; width: 40px; height: 40px; border: 3px solid var(--accent-cyan); }
+        .hud-corners::before, .hud-corners::after, .hud-corners span::before, .hud-corners span::after { content: ''; position: absolute; width: 40px; height: 40px; border: 3px solid var(--accent-cyan); opacity: 0.7; }
         .hud-corners::before { top: 0; left: 0; border-right: none; border-bottom: none; } .hud-corners::after { top: 0; right: 0; border-left: none; border-bottom: none; } .hud-corners span::before { bottom: 0; left: 0; border-right: none; border-top: none; } .hud-corners span::after { bottom: 0; right: 0; border-left: none; border-top: none; }
 
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-cyan); padding-bottom: 15px; margin-bottom: 15px; z-index: 10; }
@@ -23,14 +25,16 @@
         h1 { font-family: 'Chakra Petch', sans-serif; font-size: 3rem; margin: 0; letter-spacing: 4px; text-transform: uppercase; color: var(--accent-cyan); }
         
         #reloj-digital { font-family: 'Chakra Petch', sans-serif; font-size: 2.2rem; color: var(--accent-cyan); letter-spacing: 2px; font-variant-numeric: tabular-nums; background: #111; border: 1px solid var(--accent-cyan); padding: 8px 18px; border-radius: 8px; display: flex; align-items: center; }
-        .live-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-red); margin-right: 12px; }
+        .live-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-red); margin-right: 12px; opacity: 1; animation: blink-hardware 1.5s infinite steps(2); }
+        @keyframes blink-hardware { 0% { opacity: 1; } 100% { opacity: 0; } }
 
         #pantalla-setup { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; gap: 40px; }
         .qr-gigante { background: #111; border: 2px solid var(--accent-cyan); padding: 20px; border-radius: 16px; text-align: center; }
         .qr-url { font-family: 'Chakra Petch'; font-size: 1.5rem; color: var(--accent-cyan); margin-top: 15px; font-weight: bold; letter-spacing: 2px; }
         
         #roster-preview { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; max-width: 80%; }
-        .roster-tag { background: #111; border: 1px solid var(--accent-cyan); color: #fff; padding: 10px 25px; border-radius: 8px; font-family: 'Chakra Petch'; font-size: 1.5rem; font-weight: bold; text-transform: uppercase; }
+        .roster-tag { background: #111; border: 1px solid var(--accent-cyan); color: #fff; padding: 10px 25px; border-radius: 8px; font-family: 'Chakra Petch'; font-size: 1.5rem; font-weight: bold; text-transform: uppercase; transform: scale(0); animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes pop-in { to { transform: scale(1); } }
 
         #pantalla-juego { display: none; flex: 1; flex-direction: column; z-index: 10; }
         .sub-header { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
@@ -39,12 +43,13 @@
         #contenedor-principal { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; padding-right: 10px; }
         .arena-principal { width: 100%; display: grid; grid-template-columns: 1fr; gap: 22px; margin: auto 0; align-content: center; }
         
-        /* TARJETAS ESTÁTICAS SIN GLOW INFINITO */
-        .mesa-card:nth-child(1) { --c-mesa: #00f0ff; }
-        .mesa-card:nth-child(2) { --c-mesa: #00ff88; }
-        .mesa-card:nth-child(3) { --c-mesa: #ff00ff; }
-        .mesa-card:nth-child(4) { --c-mesa: #ffaa00; }
-        .mesa-card { background: #0c101d; border: 2px solid var(--c-mesa); border-radius: 16px; padding: 30px 30px; display: flex; flex-direction: column; justify-content: center; position: relative; min-height: 120px; }
+        /* ENTRADA EN CASCADA OPTIMIZADA (Slide In + Fade) */
+        .mesa-card:nth-child(1) { --c-mesa: #00f0ff; animation-delay: 0.1s; }
+        .mesa-card:nth-child(2) { --c-mesa: #00ff88; animation-delay: 0.2s; }
+        .mesa-card:nth-child(3) { --c-mesa: #ff00ff; animation-delay: 0.3s; }
+        .mesa-card:nth-child(4) { --c-mesa: #ffaa00; animation-delay: 0.4s; }
+        .mesa-card { background: #0c101d; border: 2px solid var(--c-mesa); border-radius: 16px; padding: 30px 30px; display: flex; flex-direction: column; justify-content: center; position: relative; min-height: 120px; opacity: 0; transform: translateX(50px); animation: slide-in 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        @keyframes slide-in { to { opacity: 1; transform: translateX(0); } }
         
         .mesa-badge { position: absolute; top: -14px; left: 30px; z-index: 5; background: var(--c-mesa); color: #000; font-family: 'Chakra Petch', sans-serif; font-weight: 900; padding: 4px 25px; font-size: 1.3rem; letter-spacing: 2px; }
         .enfrentamiento { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; z-index: 5; position: relative; }
@@ -52,10 +57,14 @@
         
         .vs-container { position: relative; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .vs { font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: var(--accent-red); font-size: 1.8rem; z-index: 2; }
+        
+        /* RADAR ESTILO ANIME (Hecho con escala, súper barato para la CPU) */
+        .vs-ring { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid var(--accent-red); border-radius: 50%; opacity: 0; animation: radar-ping 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+        @keyframes radar-ping { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
 
-        /* TRANSICIÓN SIMPLE SIN GLITCH */
-        #flash-cortina { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: #000; display: flex; justify-content: center; align-items: center; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; }
-        #flash-cortina.activo { opacity: 1; }
+        /* TRANSICIÓN LIMPIA Y RÁPIDA */
+        #flash-cortina { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: var(--accent-red); display: flex; justify-content: center; align-items: center; pointer-events: none; opacity: 0; transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.2s ease; }
+        #flash-cortina.activo { transform: translateX(0); opacity: 1; }
         .cartel-epico { font-family: 'Chakra Petch', sans-serif; font-size: 6rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 8px; }
 
         footer { border-top: 2px solid #333; padding-top: 15px; margin-top: 20px; display: flex; flex-direction: column; align-items: center; font-size: 1.2rem; gap: 12px; z-index: 10; }
@@ -63,12 +72,11 @@
         #proxima-info { font-weight: 700; color: var(--accent-cyan); background: #111; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--accent-cyan); display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; box-sizing: border-box; }
         .mesa-proxima-tag { background: #222; padding: 4px 10px; border-radius: 4px; white-space: nowrap; font-family: 'Chakra Petch', sans-serif; }
         
-        /* ZÓCALO OPTIMIZADO */
         .ticker-wrap { width: 100vw; margin-left: -40px; background: #000; border-top: 2px solid var(--accent-cyan); border-bottom: 2px solid var(--accent-cyan); padding: 8px 0; overflow: hidden; position: relative; display: flex; margin-top: auto; z-index: 10; }
-        .ticker { display: inline-block; white-space: nowrap; font-family: 'Chakra Petch', sans-serif; color: var(--accent-cyan); font-weight: 700; font-size: 1.2rem; letter-spacing: 3px; text-transform: uppercase; padding-left: 100%; animation: ticker-scroll 25s linear infinite; }
-        @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        /* Animación transform es gratis para el procesador */
+        .ticker { display: inline-block; white-space: nowrap; font-family: 'Chakra Petch', sans-serif; color: var(--accent-cyan); font-weight: 700; font-size: 1.2rem; letter-spacing: 3px; text-transform: uppercase; padding-left: 100%; transform: translate3d(0,0,0); animation: ticker-scroll 20s linear infinite; }
+        @keyframes ticker-scroll { 0% { transform: translate3d(0,0,0); } 100% { transform: translate3d(-100%,0,0); } }
 
-        /* HUD GESTO ESTÁTICO */
         #indicador-gesto { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); background: #111; border: 2px solid var(--accent-cyan); padding: 10px 20px; border-radius: 8px; z-index: 10000; display: none; flex-direction: column; align-items: center; gap: 8px; }
         #indicador-texto { font-family: 'Chakra Petch'; color: var(--accent-cyan); font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; }
         #indicador-barra { width: 250px; height: 12px; background: #222; border-radius: 6px; overflow: hidden; }
@@ -76,6 +84,11 @@
     </style>
 </head>
 <body>
+    <!-- AUDIO: EFECTOS DE SONIDO (Secret weapon) -->
+    <audio id="sfx-nueva-ronda" src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-interface-robot-click-3143.mp3" preload="auto"></audio>
+    <audio id="sfx-gesto-ok" src="https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3" preload="auto"></audio>
+
+    <div class="bg-grid"></div>
     <div class="hud-corners"><span></span></div>
     
     <div id="indicador-gesto">
@@ -130,12 +143,21 @@
         let qrGenerado = false;
         let estadoActualStr = "";
 
+        // Sonidos
+        const sfxRonda = document.getElementById('sfx-nueva-ronda');
+        const sfxGesto = document.getElementById('sfx-gesto-ok');
+
         function mostrarCortinaEpica(numeroRonda) {
             let cortina = document.getElementById('flash-cortina');
             let textoCortina = document.getElementById('texto-cortina');
+            
+            // Hacemos sonar el audio
+            sfxRonda.currentTime = 0;
+            sfxRonda.play().catch(e => console.log("Audio bloqueado inicialmente por el navegador"));
+
             textoCortina.innerText = `RONDA ${numeroRonda}`;
             cortina.classList.add('activo');
-            setTimeout(() => { cortina.classList.remove('activo'); }, 700); 
+            setTimeout(() => { cortina.classList.remove('activo'); }, 800); 
         }
 
         function renderizarSetup(data) {
@@ -167,6 +189,7 @@
                         <div class="enfrentamiento">
                             <div class="jugador">${p.jugador1}</div>
                             <div class="vs-container">
+                                <div class="vs-ring"></div>
                                 <div class="vs">VS</div>
                             </div>
                             <div class="jugador">${p.jugador2}</div>
@@ -174,7 +197,10 @@
                     </div>`;
             });
             htmlPartidos += '</div>';
-            document.getElementById('contenedor-principal').innerHTML = htmlPartidos;
+            
+            // Forzamos un reflow para que la animación de cascada (slide-in) vuelva a dispararse en cada ronda
+            let contenedor = document.getElementById('contenedor-principal');
+            contenedor.innerHTML = htmlPartidos;
 
             let descansan = data.ronda_actual.descansan;
             let dTexto = (descansan && descansan.length > 0) ? descansan.map(j => `<span class="tag-descanso">${j}</span>`).join('') : '<span style="color:#555;">NINGUNO</span>';
@@ -204,7 +230,7 @@
                 } else {
                     if (estadoActualStr === 'setup' || (estadoActualStr === 'jugando' && !document.getElementById('ronda-titulo').innerText.includes(data.numero_ronda))) {
                         mostrarCortinaEpica(data.numero_ronda);
-                        setTimeout(() => { renderizarJuego(data); }, 200);
+                        setTimeout(() => { renderizarJuego(data); }, 300);
                     } else {
                         renderizarJuego(data); 
                     }
@@ -222,7 +248,7 @@
         let cooldownCamara = false;
         const TIEMPO_REQUERIDO = 1000;
         const TIEMPO_COOLDOWN = 3000;
-        let framesOmitidos = 0; // Para no ahogar al CPU leyendo la cámara cada milisegundo
+        let framesOmitidos = 0; 
 
         navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
             video.srcObject = stream;
@@ -230,7 +256,7 @@
         }).catch(err => console.error("Chrome bloqueó la cámara.", err));
 
         function chequearBrillo() {
-            // Solo procesamos 1 de cada 4 frames para darle respiro al CPU de la Pentium
+            // Salteamos frames para no usar tanta CPU
             framesOmitidos++;
             if (framesOmitidos < 4) {
                 requestAnimationFrame(chequearBrillo);
@@ -248,7 +274,6 @@
                 let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 let sumaLuma = 0;
                 
-                // Muestreo ultra rápido (saltea de a 100 píxeles)
                 for (let i = 0; i < frame.data.length; i += 100) {
                     let r = frame.data[i], g = frame.data[i+1], b = frame.data[i+2];
                     sumaLuma += (0.299*r + 0.587*g + 0.114*b);
@@ -268,6 +293,10 @@
                         hudProgreso.style.width = porcentaje + '%'; 
                         
                         if (tiempoPasado >= TIEMPO_REQUERIDO) { 
+                            // Sonido de éxito al tapar la cámara
+                            sfxGesto.currentTime = 0;
+                            sfxGesto.play().catch(e => {});
+
                             fetch('/api/avanzar', { method: 'POST' });
                             inicioOscuro = null;
                             hudGesto.style.display = 'none';
