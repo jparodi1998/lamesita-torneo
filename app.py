@@ -195,5 +195,5 @@ if __name__ == '__main__':
     ip_real = estado_global['ip_local']
     print(f"🚀 INICIANDO SISTEMA LMI...")
     print(f"📱 ADMIN (Celu):  http://{ip_real}:5050/admin")
-    threading.Timer(1.2, abrir_navegador).start()
+    
     app.run(host='0.0.0.0', port=5050, debug=False)
