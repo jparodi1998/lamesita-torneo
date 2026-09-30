@@ -35,7 +35,21 @@
             margin-bottom: 15px; 
             z-index: 10; 
         }
-        
+        .wifi-info { 
+            margin-top: 15px; 
+            padding-top: 15px; 
+            border-top: 1px dashed var(--accent-cyan); 
+            font-family: 'Chakra Petch', sans-serif; 
+            font-size: 1.3rem; 
+            color: #ccc; 
+            text-align: center; 
+            line-height: 1.6;
+        }
+        .wifi-info .resalto { 
+            color: var(--accent-gold); 
+            font-weight: 900; 
+            letter-spacing: 2px; 
+        }
         .logo-container { display: flex; align-items: center; gap: 20px; }
         .club-logo { width: 90px; height: auto; object-fit: contain; }
         
@@ -122,6 +136,13 @@
         <div class="qr-gigante">
             <canvas id="qr-admin"></canvas>
             <div class="qr-url" id="qr-texto-url">ESCANEAR PARA ADMIN</div>
+            
+            <!-- PANEL DE WI-FI AÑADIDO -->
+            <div class="wifi-info">
+                <div>RED: <span class="resalto">LAMESITA_ADMIN</span></div>
+                <div>PASS: <span class="resalto">mesita1234</span></div>
+            </div>
+            
         </div>
         <div id="roster-preview"></div>
     </div>
