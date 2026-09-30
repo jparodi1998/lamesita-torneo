@@ -11,15 +11,8 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
 def get_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(('10.255.255.255', 1))
-        IP = s.getsockname()[0]
-    except Exception:
-        IP = '127.0.0.1'
-    finally:
-        s.close()
-    return IP
+    # Forzamos la IP estática del Hotspot de Lubuntu
+    return "10.42.0.1"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
