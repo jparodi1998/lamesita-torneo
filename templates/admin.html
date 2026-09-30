@@ -71,6 +71,10 @@
 
         <button class="btn-red" onclick="avanzarRonda()" style="margin-top: 20px;">⏭️ AVANZAR RONDA MANUAL</button>
 
+        <button onclick="volverAlLobby()" style="background: #ff0055; color: white; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 10px;">
+            ⏹ VOLVER AL LOBBY (Editar Jugadores)
+        </button>   
+
         <div class="card" style="margin-top: 30px; border-color: #ff0055;">
             <h3 style="color: #ff0055;">🚨 GESTIONAR BAJAS</h3>
             <p style="font-size: 0.8rem; color: #888;">Si alguien se va temprano, eliminalo acá.</p>
@@ -119,6 +123,16 @@
             mandarAgregar(input.value.toUpperCase());
             input.value = "";
         }
+
+        function volverAlLobby() {
+    if(confirm("¿Seguro que querés detener el torneo actual para editar jugadores? Se armará un fixture nuevo.")) {
+        fetch('/api/volver_lobby', { method: 'POST' })
+        .then(() => {
+            // Refresca o cambia la vista del admin para volver a mostrar el input de jugadores
+            location.reload(); 
+        });
+    }
+}
 
         async function quitarJugador(nombre) {
             if(confirm(`¿Seguro que querés eliminar a ${nombre}?`)) {

@@ -154,6 +154,12 @@ def quitar_jugador():
             
     return jsonify({"status": "ok"})
 
+@app.route('/api/volver_lobby', methods=['POST'])
+def volver_lobby():
+    # Volvemos a la pantalla del QR manteniendo la lista de jugadores intacta
+    estado_global['estado'] = 'setup'
+    return jsonify({"status": "ok"})
+
 @app.route('/api/iniciar', methods=['POST'])
 def iniciar():
     if len(estado_global['jugadores']) < 2:
